@@ -27,13 +27,11 @@ local phrases = {
 		[0] = "Бесконечная Коробка Пиццы",
 		[1] = "В вас больше не влезет, стоит остановиться.",
 		[2] = "Вы 'лопнули'",
-		[3] = "Вы съели кусочек пиццы."
 	},
 	["en"] = {
 		[0] = "Endless Pizza Box",
 		[1] = "You won't fit anymore, it's worth stopping.",
 		[2] = "You 'exploded'",
-		[3] = "You ate a slice of pizza.",
 	}
 }
 
@@ -71,7 +69,7 @@ function ENT:Initialize()
 	else
 		steamworks.FileInfo("2623390511", function(tbl)
 			if IsValid(self) then
-				self["FuckingGay"] = tbl["ownername"]	-- Special for you <3
+				self["Fuck You"] = tbl["ownername"]	-- Special for you <3
 			end
 		end)
 	end
@@ -84,9 +82,16 @@ function ENT:Think()
 	end
 end
 
+local snd = Sound("pikasoft/nom.ogg")
 function ENT:EatPiece(ply, id)
 	self:SetBodygroup(id, 1)
-	ply:EmitSound("nom.ogg", math.random(50, 80), math.random(80, 110), 0.5)
+	if (ply["pika.endless_pizza_box_voice"] == nil) then
+		ply["pika.endless_pizza_box_voice"] = {math.random(50, 80), math.random(80, 110)}
+	end
+
+	local sndTbl = ply["pika.endless_pizza_box_voice"]
+
+	ply:EmitSound(snd, sndTbl[1], sndTbl[2], 0.5)
 	ply:SetHealth(ply:Health() + 5)
 	ply[self:GetClass().."_Timeout"] = CurTime() + math.random(5, 10)
 
@@ -112,10 +117,6 @@ function ENT:EatPiece(ply, id)
 			ply:KillSilent()
 			ply["pika.endless_pizza_box_marker"] = false
 		end
-	else
-		net.Start("pika.endless_pizza_box")
-			net.WriteUInt(3, 2)
-		net.Send(ply)
 	end
 end
 
