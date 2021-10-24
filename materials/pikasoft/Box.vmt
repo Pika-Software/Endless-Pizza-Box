@@ -1,0 +1,7 @@
+VertexLitGeneric
+{
+	$basetexture "pikasoft/PizzaBox_diffuse"
+	$bumpmap "pikasoft/PizzaBox_normal"
+
+	$model 1
+}

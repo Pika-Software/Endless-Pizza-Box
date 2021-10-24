@@ -1,0 +1,14 @@
+VertexLitGeneric
+{
+	$basetexture "pikasoft/pizza_diffuse"
+	$bumpmap "pikasoft/pizza_normal"
+
+	$phong 1
+	$phongfresnelranges "[0.44 0.72 1]"
+	$phongtint "[0.88 0.37 0.18]"
+	$phongexponent 174
+	$phongboost 0.95
+	$phongalbedoboost 8
+
+	$model 1
+}
