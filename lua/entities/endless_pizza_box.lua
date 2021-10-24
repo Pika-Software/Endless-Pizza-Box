@@ -1,3 +1,23 @@
+local util_AddNetworkString = SERVER and util.AddNetworkString
+local something_interesting = CLIENT and steamworks.FileInfo
+local language_Add = CLIENT and language.Add
+local chat_AddText = CLIENT and chat.AddText
+local net_Send = SERVER and net.Send
+local net_WriteUInt = net.WriteUInt
+local net_ReadUInt = net.ReadUInt
+local table_insert = table.insert
+local table_Random = table.Random
+local timer_Simple = timer.Simple
+local util_Effect = util.Effect
+local math_random = math.random
+local EffectData = EffectData
+local net_Start = net.Start
+local IsValid = IsValid
+local CurTime = CurTime
+local ipairs = ipairs
+local Vector = Vector
+local pairs = pairs
+
 AddCSLuaFile()
 
 local phrases = {
@@ -19,25 +39,25 @@ if CLIENT then
 	ENT.Author = "DefaultOS & PrikolMen:-b"
 
 	for tag, text in pairs(phrases["en"]) do
-		language.Add("pika.endless_pizza_box_"..tag, text)
+		language_Add("pika.endless_pizza_box_"..tag, text)
 	end
 
 	local main1 = Color(254, 84, 54)
 	local main2 = Color(200, 200, 200)
 
 	net.Receive("pika.endless_pizza_box", function()
-		local text = net.ReadUInt(2)
+		local text = net_ReadUInt(2)
 		if (text == 2) then
 			local effectdata = EffectData()
 			effectdata:SetOrigin(LocalPlayer():GetPos())
 			effectdata:SetStart(Vector(255, 0, 0))
-			util.Effect("balloon_pop", effectdata)
+			util_Effect("balloon_pop", effectdata)
 		else
-			chat.AddText(main1, "[", "#pika.endless_pizza_box_0", "] ", main2,"#pika.endless_pizza_box_"..text)
+			chat_AddText(main1, "[", "#pika.endless_pizza_box_0", "] ", main2,"#pika.endless_pizza_box_"..text)
 		end
 	end)
 else
-	util.AddNetworkString("pika.endless_pizza_box")
+	util_AddNetworkString("pika.endless_pizza_box")
 end
 
 hook.Add("LanguageChanged", "pika.endless_pizza_box", function(_, lang)
@@ -73,7 +93,7 @@ function ENT:Initialize()
 		self:SetHealth(self["HP"])
 		self:SetMaxHealth(self["HP"])
 	else
-		steamworks.FileInfo("2623390511", function(tbl)
+		something_interesting("2623390511", function(tbl)
 			if IsValid(self) then
 				self["Fuck You"] = tbl["ownername"]	-- Special for you <3
 			end
@@ -92,31 +112,31 @@ local snd = Sound("pikasoft/nom.ogg")
 function ENT:EatPiece(ply, id)
 	self:SetBodygroup(id, 1)
 	if (ply["pika.endless_pizza_box_voice"] == nil) then
-		ply["pika.endless_pizza_box_voice"] = {math.random(50, 80), math.random(80, 110)}
+		ply["pika.endless_pizza_box_voice"] = {math_random(50, 80), math_random(80, 110)}
 	end
 
 	local sndTbl = ply["pika.endless_pizza_box_voice"]
 
 	ply:EmitSound(snd, sndTbl[1], sndTbl[2], 0.5)
 	ply:SetHealth(ply:Health() + 5)
-	ply[self:GetClass().."_Timeout"] = CurTime() + math.random(5, 10)
+	ply[self:GetClass().."_Timeout"] = CurTime() + math_random(5, 10)
 
 	local hp = ply:Health()
 	if (hp > 200) then
 		if not ply["pika.endless_pizza_box_marker"] then
 			ply["pika.endless_pizza_box_marker"] = true
-			net.Start("pika.endless_pizza_box")
-				net.WriteUInt(1, 2)
-			net.Send(ply)
+			net_Start("pika.endless_pizza_box")
+				net_WriteUInt(1, 2)
+			net_Send(ply)
 		elseif (hp > 250) then
 			local effectdata = EffectData()
 			effectdata:SetOrigin(ply:GetPos())
 			effectdata:SetStart(Vector(255, 0, 0))
-			util.Effect("balloon_pop", effectdata)
+			util_Effect("balloon_pop", effectdata)
 
-			net.Start("pika.endless_pizza_box")
-				net.WriteUInt(2, 2)
-			net.Send(ply)
+			net_Start("pika.endless_pizza_box")
+				net_WriteUInt(2, 2)
+			net_Send(ply)
 
 			ply:SendLua("achievements.BalloonPopped()")
 			
@@ -139,7 +159,7 @@ function ENT:GetNonEatedPieces()
 
 	for num, id in ipairs(self["Pieces"]) do
 		if (self:GetBodygroup(id) == 1) then continue end
-		table.insert(nonEated, id)
+		table_insert(nonEated, id)
 	end
 
 	return nonEated
@@ -153,14 +173,14 @@ function ENT:Use(ply)
 		self["Opened"] = true
 		self["UseTimeout"] = time + self:SequenceDuration(self:GetSequence()) 
 	else
-		self:EatPiece(ply, table.Random(self:GetNonEatedPieces()))
+		self:EatPiece(ply, table_Random(self:GetNonEatedPieces()))
 
 		if self:IsAllEated() then
 			self:ResetSequence("Close")
 			self["Opened"] = false
 			
 			local duration = self:SequenceDuration(self:GetSequence())
-			timer.Simple(duration, function()
+			timer_Simple(duration, function()
 				if IsValid(self) then
 					for id, tbl in pairs(self["Pieces"]) do
 						self:SetBodygroup(id, 0)
