@@ -1,8 +1,26 @@
 AddCSLuaFile()
 
+local phrases = {
+	["ru"] = {
+		[0] = "Бесконечная Коробка Пиццы",
+		[1] = "В вас больше не влезет, стоит остановиться.",
+		[2] = "Вы 'лопнули'",
+		[3] = "Другое",
+	},
+	["en"] = {
+		[0] = "Endless Pizza Box",
+		[1] = "You won't fit anymore, it's worth stopping.",
+		[2] = "You 'exploded'",
+		[3] = "Other",
+	}
+}
+
 if CLIENT then
 	ENT.Author = "DefaultOS & PrikolMen:-b"
-	language.Add("pika.endless_pizza_box_0", "Endless Pizza Box")
+
+	for tag, text in pairs(phrases["en"]) do
+		language.Add("pika.endless_pizza_box_"..tag, text)
+	end
 
 	local main1 = Color(254, 84, 54)
 	local main2 = Color(200, 200, 200)
@@ -22,19 +40,6 @@ else
 	util.AddNetworkString("pika.endless_pizza_box")
 end
 
-local phrases = {
-	["ru"] = {
-		[0] = "Бесконечная Коробка Пиццы",
-		[1] = "В вас больше не влезет, стоит остановиться.",
-		[2] = "Вы 'лопнули'",
-	},
-	["en"] = {
-		[0] = "Endless Pizza Box",
-		[1] = "You won't fit anymore, it's worth stopping.",
-		[2] = "You 'exploded'",
-	}
-}
-
 hook.Add("LanguageChanged", "pika.endless_pizza_box", function(_, lang)
     if (lang == "ru") then
 		for tag, text in pairs(phrases[lang]) do
@@ -49,6 +54,7 @@ end)
 
 ENT.Base = "base_anim"
 ENT.PrintName = "#pika.endless_pizza_box_0"
+ENT.Category = "#pika.endless_pizza_box_3"
 ENT.AutomaticFrameAdvance = true
 ENT.Spawnable = true
 
