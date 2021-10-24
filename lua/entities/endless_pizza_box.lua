@@ -40,7 +40,6 @@ local phrases = {
 hook.Add("LanguageChanged", "pika.endless_pizza_box", function(_, lang)
     if (lang == "ru") then
 		for tag, text in pairs(phrases[lang]) do
-			print(tag, text)
 			PLang:AddPhrase(text, lang, "pika.endless_pizza_box_"..tag)
 		end
     else
