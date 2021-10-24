@@ -1,5 +1,4 @@
 local util_AddNetworkString = SERVER and util.AddNetworkString
-local something_interesting = CLIENT and steamworks.FileInfo
 local language_Add = CLIENT and language.Add
 local chat_AddText = CLIENT and chat.AddText
 local net_Send = SERVER and net.Send
@@ -93,7 +92,7 @@ function ENT:Initialize()
 		self:SetHealth(self["HP"])
 		self:SetMaxHealth(self["HP"])
 	else
-		something_interesting("2623390511", function(tbl)
+		steamworks.FileInfo("2623390511", function(tbl)
 			if IsValid(self) then
 				self["Fuck You"] = tbl["ownername"]	-- Special for you <3
 			end
