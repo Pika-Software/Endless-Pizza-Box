@@ -80,7 +80,6 @@ ENT.Spawnable = true
 -- Custom Data
 ENT["Pieces"] = {2, 1, 3, 4, 5, 6, 7, 8}
 ENT["UseTimeout"] = 0
-ENT["HP"] = 25
 
 function ENT:Initialize()
 	if SERVER then
@@ -89,14 +88,9 @@ function ENT:Initialize()
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 
-		self:SetHealth(self["HP"])
-		self:SetMaxHealth(self["HP"])
-	else
-		steamworks.FileInfo("2623390511", function(tbl)
-			if IsValid(self) then
-				self["Fuck You"] = tbl["ownername"]	-- Special for you <3
-			end
-		end)
+		if isfunction(self["SetUnbreakable"]) then
+			self:SetUnbreakable(true)
+		end
 	end
 end
 
