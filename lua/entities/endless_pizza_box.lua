@@ -24,13 +24,11 @@ local phrases = {
 		[0] = "Бесконечная Коробка Пиццы",
 		[1] = "В вас больше не влезет, стоит остановиться.",
 		[2] = "Вы 'лопнули'",
-		[3] = "Другое",
 	},
 	["en"] = {
 		[0] = "Endless Pizza Box",
 		[1] = "You won't fit anymore, it's worth stopping.",
 		[2] = "You 'exploded'",
-		[3] = "Other",
 	}
 }
 
@@ -77,7 +75,7 @@ end)
 
 ENT.Base = "base_anim"
 ENT.PrintName = "#pika.endless_pizza_box_0"
-ENT.Category = "#pika.endless_pizza_box_3"
+ENT.Category = "Fun + Games"
 ENT.AutomaticFrameAdvance = true
 ENT.Spawnable = true
 
