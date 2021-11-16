@@ -57,6 +57,10 @@ if CLIENT then
 	end)
 else
 	util_AddNetworkString("pika.endless_pizza_box")
+	
+	function ENT:OnTakeDamage()
+		self:RemoveAllDecals()
+	end
 end
 
 hook.Add("LanguageChanged", "pika.endless_pizza_box", function(_, lang)
