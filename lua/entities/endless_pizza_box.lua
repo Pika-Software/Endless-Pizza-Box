@@ -88,7 +88,7 @@ ENT["UseTimeout"] = 0
 function ENT:Initialize()
 	if SERVER then
 		self:SetModel("models/pikasoft/scp-458.mdl")
-
+		self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 
@@ -112,34 +112,32 @@ function ENT:EatPiece(ply, id)
 		ply["pika.endless_pizza_box_voice"] = {math_random(50, 80), math_random(80, 110)}
 	end
 
-	local sndTbl = ply["pika.endless_pizza_box_voice"]
-
-	ply:EmitSound(snd, sndTbl[1], sndTbl[2], 0.5)
-	ply:SetHealth(ply:Health() + 5)
-	ply[self:GetClass().."_Timeout"] = CurTime() + math_random(5, 10)
+	ply["pika.endless_pizza_box_timeout"] = CurTime() + math_random(5, 10)
+	ply:EmitSound(snd, ply["pika.endless_pizza_box_voice"][1], ply["pika.endless_pizza_box_voice"][2], 0.5)
 
 	local hp = ply:Health()
-	if (hp > 200) then
-		if not ply["pika.endless_pizza_box_marker"] then
-			ply["pika.endless_pizza_box_marker"] = true
-			net_Start("pika.endless_pizza_box")
-				net_WriteUInt(1, 2)
-			net_Send(ply)
-		elseif (hp > 250) then
-			local effectdata = EffectData()
-			effectdata:SetOrigin(ply:GetPos())
-			effectdata:SetStart(Vector(255, 0, 0))
-			util_Effect("balloon_pop", effectdata)
+	if (hp > 200) and not ply["pika.endless_pizza_box_marker"] then
+		ply["pika.endless_pizza_box_marker"] = true
 
-			net_Start("pika.endless_pizza_box")
-				net_WriteUInt(2, 2)
-			net_Send(ply)
+		net_Start("pika.endless_pizza_box")
+			net_WriteUInt(1, 2)
+		net_Send(ply)
+	elseif (hp > 250) then
+		local effectdata = EffectData()
+		effectdata:SetOrigin(ply:GetPos())
+		effectdata:SetStart(Vector(255, 0, 0))
+		util_Effect("balloon_pop", effectdata)
 
-			ply:SendLua("achievements.BalloonPopped()")
-			
-			ply:KillSilent()
-			ply["pika.endless_pizza_box_marker"] = false
-		end
+		net_Start("pika.endless_pizza_box")
+			net_WriteUInt(2, 2)
+		net_Send(ply)
+
+		ply:SendLua("achievements.BalloonPopped()")
+		
+		ply:KillSilent()
+		ply["pika.endless_pizza_box_marker"] = false
+	else
+		ply:SetHealth(ply:Health() + 5)
 	end
 end
 
@@ -164,7 +162,7 @@ end
 
 function ENT:Use(ply)
 	local time = CurTime()
-	if (self["UseTimeout"] > time) or ((ply[self:GetClass().."_Timeout"] or 0) > time) then return end
+	if (self["UseTimeout"] > time) or ((ply["pika.endless_pizza_box_timeout"] or 0) > time) then return end
 	if not self["Opened"] then
 		self:ResetSequence("Open")
 		self["Opened"] = true
