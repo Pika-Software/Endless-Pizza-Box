@@ -1,4 +1,3 @@
-local language_Add = CLIENT and language.Add
 local chat_AddText = CLIENT and chat.AddText
 local net_Send = SERVER and net.Send
 local net_WriteUInt = net.WriteUInt
@@ -35,7 +34,7 @@ if CLIENT then
 	ENT.Author = "DefaultOS & PrikolMen:-b"
 
 	for tag, text in pairs(phrases["en"]) do
-		language_Add("pika.endless_pizza_box_"..tag, text)
+		language.Add("pika.endless_pizza_box_"..tag, text)
 	end
 
 	local main1 = Color(254, 84, 54)
@@ -62,11 +61,11 @@ end
 
 local tag = "pika.endless_pizza_box_"
 for placeholder, fulltext in pairs( phrases.ru ) do
-	language_Add( tag .. placeholder, fulltext, "ru" )
+	language.Add( tag .. placeholder, fulltext, "ru" )
 end
 
 for placeholder, fulltext in pairs( phrases.en ) do
-	language_Add( tag .. placeholder, fulltext, "en" )
+	language.Add( tag .. placeholder, fulltext, "en" )
 end
 
 ENT.Base = "base_anim"
