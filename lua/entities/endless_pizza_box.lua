@@ -1,4 +1,3 @@
-local util_AddNetworkString = SERVER and util.AddNetworkString
 local language_Add = CLIENT and language.Add
 local chat_AddText = CLIENT and chat.AddText
 local net_Send = SERVER and net.Send
@@ -54,24 +53,21 @@ if CLIENT then
 		end
 	end)
 else
-	util_AddNetworkString("pika.endless_pizza_box")
-	
+	util.AddNetworkString("pika.endless_pizza_box")
+
 	function ENT:OnTakeDamage()
 		self:RemoveAllDecals()
 	end
 end
 
-hook.Add("LanguageChanged", "pika.endless_pizza_box", function(_, lang)
-    if (lang == "ru") then
-		for tag, text in pairs(phrases[lang]) do
-			PLang:AddPhrase(text, lang, "pika.endless_pizza_box_"..tag)
-		end
-    else
-		for tag, text in pairs(phrases["en"]) do
-			PLang:AddPhrase(text, "en", "pika.endless_pizza_box_"..tag)
-		end
-    end
-end)
+local tag = "pika.endless_pizza_box_"
+for placeholder, fulltext in pairs( phrases.ru ) do
+	language_Add( tag .. placeholder, fulltext, "ru" )
+end
+
+for placeholder, fulltext in pairs( phrases.en ) do
+	language_Add( tag .. placeholder, fulltext, "en" )
+end
 
 ENT.Base = "base_anim"
 ENT.PrintName = "#pika.endless_pizza_box_0"
@@ -79,9 +75,8 @@ ENT.Category = "Fun + Games"
 ENT.AutomaticFrameAdvance = true
 ENT.Spawnable = true
 
--- Custom Data
-ENT["Pieces"] = {2, 1, 3, 4, 5, 6, 7, 8}
-ENT["UseTimeout"] = 0
+ENT.Pieces = {2, 1, 3, 4, 5, 6, 7, 8}
+ENT.UseTimeout = 0
 
 function ENT:Initialize()
 	if SERVER then
@@ -98,7 +93,7 @@ end
 
 function ENT:Think()
 	if SERVER then
-		self:NextThink(CurTime())
+		self:NextThink( CurTime() )
 		return true
 	end
 end
@@ -131,7 +126,7 @@ function ENT:EatPiece(ply, id)
 		net_Send(ply)
 
 		ply:SendLua("achievements.BalloonPopped()")
-		
+
 		ply:KillSilent()
 		ply["pika.endless_pizza_box_marker"] = false
 	else
@@ -164,14 +159,14 @@ function ENT:Use(ply)
 	if not self["Opened"] then
 		self:ResetSequence("Open")
 		self["Opened"] = true
-		self["UseTimeout"] = time + self:SequenceDuration(self:GetSequence()) 
+		self["UseTimeout"] = time + self:SequenceDuration(self:GetSequence())
 	else
 		self:EatPiece(ply, table_Random(self:GetNonEatedPieces()))
 
 		if self:IsAllEated() then
 			self:ResetSequence("Close")
 			self["Opened"] = false
-			
+
 			local duration = self:SequenceDuration(self:GetSequence())
 			timer_Simple(duration, function()
 				if IsValid(self) then
