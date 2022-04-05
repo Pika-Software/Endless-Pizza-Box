@@ -1,181 +1,150 @@
-local chat_AddText = CLIENT and chat.AddText
-local net_Send = SERVER and net.Send
-local net_WriteUInt = net.WriteUInt
-local net_ReadUInt = net.ReadUInt
-local table_insert = table.insert
-local table_Random = table.Random
-local timer_Simple = timer.Simple
-local util_Effect = util.Effect
-local math_random = math.random
-local EffectData = EffectData
-local net_Start = net.Start
-local IsValid = IsValid
-local CurTime = CurTime
-local ipairs = ipairs
-local Vector = Vector
-local pairs = pairs
+ENT.PrintName = "Endless Pizza Box"
+ENT.Category = "Fun + Games"
 
-AddCSLuaFile()
+ENT.AutomaticFrameAdvance = true
+ENT.Base = "base_anim"
+ENT.Spawnable = true
 
-local phrases = {
-	["ru"] = {
-		[0] = "Бесконечная Коробка Пиццы",
-		[1] = "В вас больше не влезет, стоит остановиться.",
-		[2] = "Вы 'лопнули'",
-	},
-	["en"] = {
-		[0] = "Endless Pizza Box",
-		[1] = "You won't fit anymore, it's worth stopping.",
-		[2] = "You 'exploded'",
-	}
-}
-
-if CLIENT then
+if (CLIENT) then
 	ENT.Author = "DefaultOS & PrikolMen:-b"
+end
 
-	for tag, text in pairs(phrases["en"]) do
-		language.Add("pika.endless_pizza_box_"..tag, text)
+if (SERVER) then
+
+	AddCSLuaFile()
+
+	ENT.Model = "models/pikasoft/scp-458.mdl"
+	ENT.Pieces = {2, 1, 3, 4, 5, 6, 7, 8}
+	ENT.UseTimeout = 0
+
+	do
+
+		local COLLISION_GROUP_WEAPON = COLLISION_GROUP_WEAPON
+		local SOLID_VPHYSICS = SOLID_VPHYSICS
+		local SIMPLE_USE = SIMPLE_USE
+
+		function ENT:Initialize()
+			self:SetModel( self.Model )
+			self:SetCollisionGroup( COLLISION_GROUP_WEAPON )
+			self:PhysicsInit( SOLID_VPHYSICS )
+			self:SetUseType( SIMPLE_USE )
+
+			if isfunction( self.SetUnbreakable ) then
+				self:SetUnbreakable( true )
+			end
+		end
+
 	end
 
-	local main1 = Color(254, 84, 54)
-	local main2 = Color(200, 200, 200)
+	local CurTime = CurTime
 
-	net.Receive("pika.endless_pizza_box", function()
-		local text = net_ReadUInt(2)
-		if (text == 2) then
-			local effectdata = EffectData()
-			effectdata:SetOrigin(LocalPlayer():GetPos())
-			effectdata:SetStart(Vector(255, 0, 0))
-			util_Effect("balloon_pop", effectdata)
-		else
-			chat_AddText(main1, "[", "#pika.endless_pizza_box_0", "] ", main2,"#pika.endless_pizza_box_"..text)
-		end
-	end)
-else
-	util.AddNetworkString("pika.endless_pizza_box")
+	function ENT:Think()
+		self:NextThink( CurTime() )
+		return true
+	end
 
 	function ENT:OnTakeDamage()
 		self:RemoveAllDecals()
 	end
-end
 
-local tag = "pika.endless_pizza_box_"
-for placeholder, fulltext in pairs( phrases.ru ) do
-	language.Add( tag .. placeholder, fulltext, "ru" )
-end
+	do
 
-for placeholder, fulltext in pairs( phrases.en ) do
-	language.Add( tag .. placeholder, fulltext, "en" )
-end
+		local snd = Sound("pikasoft/nom.ogg")
+		local math_random = math.random
+		local util_Effect = util.Effect
+		local EffectData = EffectData
 
-ENT.Base = "base_anim"
-ENT.PrintName = "#pika.endless_pizza_box_0"
-ENT.Category = "Fun + Games"
-ENT.AutomaticFrameAdvance = true
-ENT.Spawnable = true
+		function ENT:EatPiece( ply, id )
+			self:SetBodygroup( id, 1 )
+			if (ply["pika.endless_pizza_box_voice"] == nil) then
+				ply["pika.endless_pizza_box_voice"] = {math_random(50, 80), math_random(80, 110)}
+			end
 
-ENT.Pieces = {2, 1, 3, 4, 5, 6, 7, 8}
-ENT.UseTimeout = 0
+			ply["pika.endless_pizza_box_timeout"] = CurTime() + math_random(5, 10)
+			ply:EmitSound( snd, ply["pika.endless_pizza_box_voice"][1], ply["pika.endless_pizza_box_voice"][2], 0.5 )
 
-function ENT:Initialize()
-	if SERVER then
-		self:SetModel("models/pikasoft/scp-458.mdl")
-		self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
-		self:PhysicsInit(SOLID_VPHYSICS)
-		self:SetUseType(SIMPLE_USE)
+			local hp = ply:Health()
+			if (hp > 200) and not ply["pika.endless_pizza_box_marker"] then
+				ply["pika.endless_pizza_box_marker"] = true
+			elseif (hp > 250) then
+				local fx = EffectData()
+				fx:SetOrigin(pos)
+				fx:SetScale(10)
+				fx:SetStart(ply:GetPlayerColor() * 255)
+				util.Effect("balloon_pop", fx)
 
-		if isfunction(self["SetUnbreakable"]) then
-			self:SetUnbreakable(true)
+				ply:SendLua("achievements.BalloonPopped()")
+
+				ply:KillSilent()
+				ply["pika.endless_pizza_box_marker"] = nil
+			else
+				ply:SetHealth(ply:Health() + 5)
+			end
 		end
-	end
-end
 
-function ENT:Think()
-	if SERVER then
-		self:NextThink( CurTime() )
-		return true
-	end
-end
-
-local snd = Sound("pikasoft/nom.ogg")
-function ENT:EatPiece(ply, id)
-	self:SetBodygroup(id, 1)
-	if (ply["pika.endless_pizza_box_voice"] == nil) then
-		ply["pika.endless_pizza_box_voice"] = {math_random(50, 80), math_random(80, 110)}
 	end
 
-	ply["pika.endless_pizza_box_timeout"] = CurTime() + math_random(5, 10)
-	ply:EmitSound(snd, ply["pika.endless_pizza_box_voice"][1], ply["pika.endless_pizza_box_voice"][2], 0.5)
+	do
 
-	local hp = ply:Health()
-	if (hp > 200) and not ply["pika.endless_pizza_box_marker"] then
-		ply["pika.endless_pizza_box_marker"] = true
+		local table_insert = table.insert
+		local ipairs = ipairs
 
-		net_Start("pika.endless_pizza_box")
-			net_WriteUInt(1, 2)
-		net_Send(ply)
-	elseif (hp > 250) then
-		local effectdata = EffectData()
-		effectdata:SetOrigin(ply:GetPos())
-		effectdata:SetStart(Vector(255, 0, 0))
-		util_Effect("balloon_pop", effectdata)
+		function ENT:GetNonEatedPieces()
+			local nonEated = {}
 
-		net_Start("pika.endless_pizza_box")
-			net_WriteUInt(2, 2)
-		net_Send(ply)
+			for num, id in ipairs( self.Pieces ) do
+				if (self:GetBodygroup(id) == 1) then continue end
+				table_insert(nonEated, id)
+			end
 
-		ply:SendLua("achievements.BalloonPopped()")
+			return nonEated
+		end
 
-		ply:KillSilent()
-		ply["pika.endless_pizza_box_marker"] = false
-	else
-		ply:SetHealth(ply:Health() + 5)
-	end
-end
+		function ENT:IsAllEated()
+			for num, id in ipairs(self.Pieces) do
+				if (self:GetBodygroup(id) != 1) then return false end
+			end
 
-function ENT:IsAllEated()
-	for num, id in ipairs(self["Pieces"]) do
-		if (self:GetBodygroup(id) != 1) then return false end
+			return true
+		end
+
 	end
 
-	return true
-end
+	do
 
-function ENT:GetNonEatedPieces()
-	local nonEated = {}
+		local timer_Simple = timer.Simple
+		local table_Random = table.Random
+		local IsValid = IsValid
+		local pairs = pairs
 
-	for num, id in ipairs(self["Pieces"]) do
-		if (self:GetBodygroup(id) == 1) then continue end
-		table_insert(nonEated, id)
-	end
+		function ENT:Use( ply )
+			local time = CurTime()
+			if (self.UseTimeout > time) or ((ply["pika.endless_pizza_box_timeout"] or 0) > time) then return end
+			if not self.Opened then
+				self:ResetSequence( "Open" )
+				self.Opened = true
+				self.UseTimeout = time + self:SequenceDuration( self:GetSequence() )
+			else
+				self:EatPiece( ply, table_Random( self:GetNonEatedPieces() ) )
 
-	return nonEated
-end
+				if self:IsAllEated() then
+					self:ResetSequence( "Close" )
+					self.Opened = false
 
-function ENT:Use(ply)
-	local time = CurTime()
-	if (self["UseTimeout"] > time) or ((ply["pika.endless_pizza_box_timeout"] or 0) > time) then return end
-	if not self["Opened"] then
-		self:ResetSequence("Open")
-		self["Opened"] = true
-		self["UseTimeout"] = time + self:SequenceDuration(self:GetSequence())
-	else
-		self:EatPiece(ply, table_Random(self:GetNonEatedPieces()))
+					local duration = self:SequenceDuration(self:GetSequence())
+					timer_Simple(duration, function()
+						if IsValid(self) then
+							for id, tbl in pairs( self.Pieces ) do
+								self:SetBodygroup(id, 0)
+							end
+						end
+					end)
 
-		if self:IsAllEated() then
-			self:ResetSequence("Close")
-			self["Opened"] = false
-
-			local duration = self:SequenceDuration(self:GetSequence())
-			timer_Simple(duration, function()
-				if IsValid(self) then
-					for id, tbl in pairs(self["Pieces"]) do
-						self:SetBodygroup(id, 0)
-					end
+					self.UseTimeout = time + duration
 				end
-			end)
-
-			self["UseTimeout"] = time + duration
+			end
 		end
+
 	end
+
 end
