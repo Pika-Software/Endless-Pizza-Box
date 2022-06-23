@@ -68,15 +68,15 @@ if (SERVER) then
 			if (hp > 200) and not ply[self.PrintName][4] then
 				ply[self.PrintName][4] = true
 			elseif (hp > 250) then
+				ply:KillSilent()
+
 				local fx = EffectData()
 				fx:SetOrigin(pos)
 				fx:SetScale(10)
 				fx:SetStart(ply:GetPlayerColor() * 255)
 				util.Effect("balloon_pop", fx)
 
-				ply:SendLua("achievements.BalloonPopped()")
-
-				ply:KillSilent()
+				ply:SendLua( "achievements.BalloonPopped()" )
 				ply[self.PrintName][4] = nil
 			else
 				ply:SetHealth( ply:Health() + 5 )
