@@ -56,16 +56,17 @@ if (SERVER) then
 
 		function ENT:EatPiece( ply, id )
 			self:SetBodygroup( id, 1 )
-			if (ply["pika.endless_pizza_box_voice"] == nil) then
-				ply["pika.endless_pizza_box_voice"] = {math_random(50, 80), math_random(80, 110)}
+
+			if (ply[self.PrintName] == nil) then
+				ply[self.PrintName] = {math_random( 50, 80 ), math_random( 80, 110 )}
 			end
 
-			ply["pika.endless_pizza_box_timeout"] = CurTime() + math_random(5, 10)
-			ply:EmitSound( snd, ply["pika.endless_pizza_box_voice"][1], ply["pika.endless_pizza_box_voice"][2], 0.5 )
+			ply[self.PrintName][3] = CurTime() + math_random(5, 10)
+			ply:EmitSound( snd, ply[self.PrintName][1], ply[self.PrintName][2], 0.5 )
 
 			local hp = ply:Health()
-			if (hp > 200) and not ply["pika.endless_pizza_box_marker"] then
-				ply["pika.endless_pizza_box_marker"] = true
+			if (hp > 200) and not ply[self.PrintName][4] then
+				ply[self.PrintName][4] = true
 			elseif (hp > 250) then
 				local fx = EffectData()
 				fx:SetOrigin(pos)
@@ -76,9 +77,9 @@ if (SERVER) then
 				ply:SendLua("achievements.BalloonPopped()")
 
 				ply:KillSilent()
-				ply["pika.endless_pizza_box_marker"] = nil
+				ply[self.PrintName][4] = nil
 			else
-				ply:SetHealth(ply:Health() + 5)
+				ply:SetHealth( ply:Health() + 5 )
 			end
 		end
 
@@ -119,7 +120,7 @@ if (SERVER) then
 
 		function ENT:Use( ply )
 			local time = CurTime()
-			if (self.UseTimeout > time) or ((ply["pika.endless_pizza_box_timeout"] or 0) > time) then return end
+			if (self.UseTimeout > time) or ((ply[self.PrintName] and ply[self.PrintName][3] or 0) > time) then return end
 			if not self.Opened then
 				self:ResetSequence( "Open" )
 				self.Opened = true
