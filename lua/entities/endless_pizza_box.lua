@@ -61,7 +61,7 @@ if (SERVER) then
 				ply[self.PrintName] = {math_random( 50, 80 ), math_random( 80, 110 )}
 			end
 
-			ply[self.PrintName][3] = CurTime() + math_random(5, 10)
+			ply[self.PrintName][3] = CurTime() + 1
 			ply:EmitSound( snd, ply[self.PrintName][1], ply[self.PrintName][2], 0.5 )
 
 			local hp = ply:Health()
