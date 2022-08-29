@@ -71,16 +71,17 @@ if (SERVER) then
 				ply:KillSilent()
 
 				local fx = EffectData()
-				fx:SetOrigin(pos)
-				fx:SetScale(10)
-				fx:SetStart(ply:GetPlayerColor() * 255)
-				util.Effect("balloon_pop", fx)
+				fx:SetOrigin( ply:EyePos() )
+				fx:SetScale( 10 )
+				fx:SetStart( ply:GetPlayerColor() * 255 )
+				util.Effect( "balloon_pop", fx )
 
 				ply:SendLua( "achievements.BalloonPopped()" )
 				ply[self.PrintName][4] = nil
-			else
-				ply:SetHealth( ply:Health() + 5 )
+				return
 			end
+
+			ply:SetHealth( ply:Health() + 5 )
 		end
 
 	end
