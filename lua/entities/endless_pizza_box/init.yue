@@ -39,6 +39,7 @@ ENT.EatPiece = ( ply, index ) =>
         return
 
     ply\SetHealth( health + scp458_heal\GetInt! )
+    return
 
 ENT.GetAvailablePieces = =>
     avaliable, count = {}, 0
@@ -74,6 +75,10 @@ ENT.Use = ( ply ) =>
         duration = @SequenceDuration( @GetSequence! )
         @UsageTimeout = curTime + duration
         timer.Simple duration, ->
-            if @IsValid!
-                for index = 1, 8
-                    @SetBodygroup( index, 0 )
+            unless @IsValid!
+                return
+
+            for index = 1, 8
+                @SetBodygroup( index, 0 )
+
+    return
