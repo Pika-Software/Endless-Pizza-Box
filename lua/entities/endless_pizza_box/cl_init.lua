@@ -1,5 +1,4 @@
-include( "shared.lua" )
-
+include("shared.lua")
 ENT.Author = "DefaultOS & PrikolMen:-b"
 ENT.PrintName = "Endless Pizza Box"
 ENT.Category = "Fun + Games"

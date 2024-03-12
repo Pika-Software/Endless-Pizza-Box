@@ -1,0 +1,5 @@
+ENT.Type = "anim"
+ENT.Spawnable = true
+ENT.AutomaticFrameAdvance = true
+ENT.Model = Model("models/pikasoft/scp-458.mdl")
+ENT.Sound = Sound("player/eating.wav")
