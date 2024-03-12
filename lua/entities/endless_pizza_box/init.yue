@@ -1,0 +1,79 @@
+AddCSLuaFile( "cl_init.lua" )
+AddCSLuaFile( "shared.lua" )
+include( "shared.lua" )
+
+flags = bit.bor( FCVAR_ARCHIVE, FCVAR_NOTIFY )
+scp458_max_heal = CreateConVar( "scp458_max_health", "250", flags, "Maximum amount of health that infinite pizza can give.", 0, 0xFFFF )
+scp458_heal = CreateConVar( "scp458_heal", "5", flags, "Amount of health that one piece of pizza heals.", 0, 0xFFFF )
+
+:random, :min, :Rand = math
+CurTime = CurTime
+
+ENT.Initialize = =>
+    @SetUseType( SIMPLE_USE )
+    @SetModel( @Model )
+
+    @SetCollisionGroup( COLLISION_GROUP_WEAPON )
+    @PhysicsInit( SOLID_VPHYSICS )
+    @PhysWake!
+    return
+
+ENT.OnTakeDamage = =>
+    @RemoveAllDecals!
+    return 0
+
+ENT.Think = =>
+    @NextThink( CurTime! )
+    return true
+
+ENT.EatPiece = ( ply, index ) =>
+    ply\EmitSound( @Sound, 65, random( 60, 120 ), Rand( 0.5, 1 ), CHAN_STATIC, 0, 1 )
+    @SetBodygroup( index, 1 )
+
+    maxHeal = scp458_max_heal\GetInt!
+    if maxHeal == 0
+        maxHeal = ply\GetMaxHealth!
+
+    health = ply\Health!
+    if health >= maxHeal
+        return
+
+    ply\SetHealth( health + scp458_heal\GetInt! )
+
+ENT.GetAvailablePieces = =>
+    avaliable, count = {}, 0
+
+    for index = 1, 8
+        if @GetBodygroup( index ) == 0
+            count += 1
+            avaliable[ count ] = index
+
+    return avaliable, count
+
+ENT.Use = ( ply ) =>
+    curTime = CurTime!
+    if ( @UsageTimeout or 0 ) > curTime or ( curTime - ( ply.m_dLastEatTime or 0 ) ) < 1
+        return
+
+    unless @m_bOpened
+        @m_bOpened = true
+        @ResetSequence( "Open" )
+        @UsageTimeout = curTime + @SequenceDuration( @GetSequence! )
+        return
+
+    avaliable, count = @GetAvailablePieces!
+
+    if count > 0
+        @EatPiece( ply, avaliable[ random( 1, count ) ] )
+        @UsageTimeout = curTime + 0.125
+        ply.m_dLastEatTime = curTime
+
+    if count < 2
+        @m_bOpened = false
+        @ResetSequence( "Close" )
+        duration = @SequenceDuration( @GetSequence! )
+        @UsageTimeout = curTime + duration
+        timer.Simple duration, ->
+            if @IsValid!
+                for index = 1, 8
+                    @SetBodygroup( index, 0 )
