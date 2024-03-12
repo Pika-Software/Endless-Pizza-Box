@@ -38,7 +38,11 @@ ENT.EatPiece = ( ply, index ) =>
     if health >= maxHeal
         return
 
-    ply\SetHealth( health + scp458_heal\GetInt! )
+    health = health + scp458_heal\GetInt!
+    if health > maxHeal
+        health = maxHeal
+
+    ply\SetHealth( health )
     return
 
 ENT.GetAvailablePieces = =>
