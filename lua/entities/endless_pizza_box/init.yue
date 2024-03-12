@@ -6,7 +6,7 @@ flags = bit.bor( FCVAR_ARCHIVE, FCVAR_NOTIFY )
 scp458_max_heal = CreateConVar( "scp458_max_health", "250", flags, "Maximum amount of health that infinite pizza can give.", 0, 0xFFFF )
 scp458_heal = CreateConVar( "scp458_heal", "5", flags, "Amount of health that one piece of pizza heals.", 0, 0xFFFF )
 
-:random, :min, :Rand = math
+:random, :Rand = math
 CurTime = CurTime
 
 ENT.Initialize = =>
